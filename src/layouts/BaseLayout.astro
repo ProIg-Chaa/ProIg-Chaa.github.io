@@ -1,0 +1,41 @@
+---
+import "katex/dist/katex.min.css";
+import "../styles/global.css";
+
+const {
+  title = "ProIg-Chaa",
+  description = "Chaa 的 AI 学习笔记主页"
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="ProIg-Chaa 首页">
+        <span class="brand-mark">C</span>
+        <span>ProIg-Chaa</span>
+      </a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="/">首页</a>
+        <a href="/notes/">笔记</a>
+        <a href="/about/">关于</a>
+        <a href="https://github.com/ProIg-Chaa/">GitHub</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <span>Chaa 的 AI learning log</span>
+      <a href="https://github.com/ProIg-Chaa/">github.com/ProIg-Chaa</a>
+    </footer>
+  </body>
+</html>

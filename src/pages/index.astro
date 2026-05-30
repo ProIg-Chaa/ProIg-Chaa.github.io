@@ -1,0 +1,67 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { categoryLabels, formatDate, getAllNotes } from "../lib/notes";
+
+const notes = await getAllNotes();
+const latestNotes = notes.slice(0, 3);
+const categories = Object.entries(categoryLabels).map(([key, label]) => ({
+  key,
+  label,
+  count: notes.filter((note) => note.category === key).length
+}));
+---
+
+<BaseLayout title="ProIg-Chaa | AI 学习笔记">
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">AI systems / LLM / Transformer</p>
+      <h1>Chaa 的 AI 学习笔记</h1>
+      <p class="hero-text">
+        这里整理我对 Stanford CS336、Transformer 架构和大模型系统的学习笔记。
+        目标不是堆概念，而是把系统设计、数学直觉和实现细节拆开讲清楚。
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="/notes/">阅读笔记</a>
+        <a class="button ghost" href="https://github.com/ProIg-Chaa/">GitHub</a>
+      </div>
+    </div>
+    <div class="hero-panel" aria-label="站点主题">
+      <span>Language Modeling</span>
+      <strong>from scratch</strong>
+      <p>tokenizer -> transformer -> training loop -> inference</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <p class="eyebrow">Latest notes</p>
+      <h2>最近更新</h2>
+    </div>
+    <div class="note-grid">
+      {latestNotes.map((note) => (
+        <article class="note-card">
+          <a href={note.url}>
+            <span class="meta">{note.categoryLabel} · {formatDate(note.updated)}</span>
+            <h3>{note.title}</h3>
+            <p>{note.summary}</p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <p class="eyebrow">Topics</p>
+      <h2>分类入口</h2>
+    </div>
+    <div class="topic-list">
+      {categories.map((category) => (
+        <a href={`/notes/?category=${category.key}`}>
+          <span>{category.label}</span>
+          <strong>{category.count} 篇</strong>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

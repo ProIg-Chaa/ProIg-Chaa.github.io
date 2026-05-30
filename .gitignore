@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.playwright-cli/
+output/playwright/
+.env
+.DS_Store
+npm-debug.log*

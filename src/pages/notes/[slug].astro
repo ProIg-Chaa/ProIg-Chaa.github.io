@@ -1,0 +1,41 @@
+---
+import { render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { formatDate, getAllNotes } from "../../lib/notes";
+
+export async function getStaticPaths() {
+  const notes = await getAllNotes();
+  return notes.map((note) => ({
+    params: { slug: note.slug },
+    props: { note }
+  }));
+}
+
+const { note } = Astro.props;
+const { Content, headings } = await render(note.entry);
+---
+
+<BaseLayout title={`${note.title} | ProIg-Chaa`} description={note.summary}>
+  <article class="article-shell">
+    <header class="article-header">
+      <a class="back-link" href="/notes/">返回笔记列表</a>
+      <p class="meta">{note.categoryLabel} · 更新于 {formatDate(note.updated)}</p>
+      <h1>{note.title}</h1>
+      <p>{note.summary}</p>
+    </header>
+
+    <div class="article-layout">
+      <aside class="toc" aria-label="文章目录">
+        <strong>目录</strong>
+        <nav>
+          {headings.filter((heading) => heading.depth <= 3).map((heading) => (
+            <a class={`depth-${heading.depth}`} href={`#${heading.slug}`}>{heading.text}</a>
+          ))}
+        </nav>
+      </aside>
+      <div class="article-content">
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>
