@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { formatDate, getAllNotes, getCategoryEntries, getNotesByCategory } from "../../../lib/notes";
+
+export async function getStaticPaths() {
+  const categories = getCategoryEntries();
+  return categories.map((category) => ({
+    params: { category: category.key },
+    props: { category }
+  }));
+}
+
+const { category } = Astro.props;
+const notes = await getNotesByCategory(category.key);
+const categories = getCategoryEntries();
+const totalNotes = (await getAllNotes()).length;
+---
+
+<BaseLayout title={`${category.label} | ProIg-Chaa`}>
+  <section class="page-head">
+    <p class="eyebrow">Category</p>
+    <h1>{category.label}</h1>
+    <p>这个分类下共有 {notes.length} 篇笔记。分类页是静态生成的，可以直接刷新、收藏和分享。</p>
+  </section>
+
+  <div class="filter-row" aria-label="笔记分类">
+    <a href="/notes/">全部 {totalNotes}</a>
+    {categories.map((item) => (
+      <a class={item.key === category.key ? "active" : ""} href={item.url}>{item.label}</a>
+    ))}
+  </div>
+
+  <section class="note-list">
+    {notes.map((note) => (
+      <article class="note-row">
+        <a href={note.url}>
+          <span class="meta">{note.categoryLabel} · {formatDate(note.updated)}</span>
+          <h2>{note.title}</h2>
+          <p>{note.summary}</p>
+        </a>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

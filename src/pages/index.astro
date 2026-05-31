@@ -1,13 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { categoryLabels, formatDate, getAllNotes } from "../lib/notes";
+import { formatDate, getAllNotes, getCategoryEntries } from "../lib/notes";
 
 const notes = await getAllNotes();
 const latestNotes = notes.slice(0, 3);
-const categories = Object.entries(categoryLabels).map(([key, label]) => ({
-  key,
-  label,
-  count: notes.filter((note) => note.category === key).length
+const categories = getCategoryEntries().map((category) => ({
+  ...category,
+  count: notes.filter((note) => note.category === category.key).length
 }));
 ---
 
@@ -17,8 +16,8 @@ const categories = Object.entries(categoryLabels).map(([key, label]) => ({
       <p class="eyebrow">AI systems / LLM / Transformer</p>
       <h1>Chaa 的 AI 学习笔记</h1>
       <p class="hero-text">
-        这里整理我在机器学习深度学习的一些思考和笔记。目前有 Stanford CS336、Transformer 架构和大模型系统的学习笔记。
-        希望对你有用
+        这里整理我在机器学习、深度学习方向的一些思考和笔记。目前主要包括 Stanford CS336、
+        Transformer 架构和大模型系统相关内容，希望对你有用。
       </p>
       <div class="hero-actions">
         <a class="button primary" href="/notes/">阅读笔记</a>
@@ -57,7 +56,7 @@ const categories = Object.entries(categoryLabels).map(([key, label]) => ({
     </div>
     <div class="topic-list">
       {categories.map((category) => (
-        <a href={`/notes/?category=${category.key}`}>
+        <a href={category.url}>
           <span>{category.label}</span>
           <strong>{category.count} 篇</strong>
         </a>

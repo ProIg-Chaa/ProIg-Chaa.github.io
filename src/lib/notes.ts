@@ -7,6 +7,8 @@ export const categoryLabels = {
   transformerarch: "Transformer 架构"
 };
 
+export type CategoryKey = keyof typeof categoryLabels;
+
 export type SiteNote = {
   entry: any;
   id: string;
@@ -18,6 +20,14 @@ export type SiteNote = {
   updated: Date;
   url: string;
 };
+
+export function getCategoryEntries() {
+  return Object.entries(categoryLabels).map(([key, label]) => ({
+    key,
+    label,
+    url: `/notes/category/${key}/`
+  }));
+}
 
 function hashText(value: string) {
   let hash = 5381;
@@ -100,6 +110,11 @@ export async function getAllNotes(): Promise<SiteNote[]> {
       };
     })
     .sort((a, b) => b.updated.getTime() - a.updated.getTime());
+}
+
+export async function getNotesByCategory(category: string) {
+  const notes = await getAllNotes();
+  return notes.filter((note) => note.category === category);
 }
 
 export async function getNoteBySlug(slug: string) {

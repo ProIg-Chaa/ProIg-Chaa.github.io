@@ -1,10 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { categoryLabels, formatDate, getAllNotes } from "../../lib/notes";
+import { formatDate, getAllNotes, getCategoryEntries } from "../../lib/notes";
 
 const notes = await getAllNotes();
-const selectedCategory = Astro.url.searchParams.get("category");
-const visibleNotes = selectedCategory ? notes.filter((note) => note.category === selectedCategory) : notes;
+const categories = getCategoryEntries();
 ---
 
 <BaseLayout title="笔记 | ProIg-Chaa">
@@ -15,14 +14,14 @@ const visibleNotes = selectedCategory ? notes.filter((note) => note.category ===
   </section>
 
   <div class="filter-row" aria-label="笔记分类">
-    <a class={selectedCategory ? "" : "active"} href="/notes/">全部</a>
-    {Object.entries(categoryLabels).map(([key, label]) => (
-      <a class={selectedCategory === key ? "active" : ""} href={`/notes/?category=${key}`}>{label}</a>
+    <a class="active" href="/notes/">全部</a>
+    {categories.map((category) => (
+      <a href={category.url}>{category.label}</a>
     ))}
   </div>
 
   <section class="note-list">
-    {visibleNotes.map((note) => (
+    {notes.map((note) => (
       <article class="note-row">
         <a href={note.url}>
           <span class="meta">{note.categoryLabel} · {formatDate(note.updated)}</span>

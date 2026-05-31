@@ -18,6 +18,7 @@ npm run dev
 
 站点会在构建时自动扫描这些文件，提取一级标题作为文章标题，并生成安全的文章 URL。
 Astro 会把分类 key 归一为小写，界面会继续显示成中文分类名。
+分类页会生成为 `/notes/category/<category>/`，例如 `/notes/category/lecture/`。
 
 ## 部署
 
