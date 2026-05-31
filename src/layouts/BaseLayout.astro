@@ -18,6 +18,9 @@ const {
     <title>{title}</title>
   </head>
   <body>
+    <div class="reading-progress" aria-hidden="true">
+      <span></span>
+    </div>
     <header class="site-header">
       <a class="brand" href="/" aria-label="ProIg-Chaa 首页">
         <span class="brand-mark">C</span>
@@ -37,5 +40,7 @@ const {
       <span>Chaa 的 AI learning log</span>
       <a href="https://github.com/ProIg-Chaa/">github.com/ProIg-Chaa</a>
     </footer>
+    <button class="back-to-top" type="button" aria-label="返回顶部">↑</button>
+    <script is:inline src="/site-effects.js" defer></script>
   </body>
 </html>

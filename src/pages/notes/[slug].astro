@@ -16,7 +16,7 @@ const { Content, headings } = await render(note.entry);
 ---
 
 <BaseLayout title={`${note.title} | ProIg-Chaa`} description={note.summary}>
-  <article class="article-shell">
+  <article class="article-shell reading-scope">
     <header class="article-header">
       <a class="back-link" href="/notes/">返回笔记列表</a>
       <p class="meta">{note.categoryLabel} · 更新于 {formatDate(note.updated)}</p>
@@ -29,7 +29,7 @@ const { Content, headings } = await render(note.entry);
         <strong>目录</strong>
         <nav>
           {headings.filter((heading) => heading.depth <= 3).map((heading) => (
-            <a class={`depth-${heading.depth}`} href={`#${heading.slug}`}>{heading.text}</a>
+            <a class={`depth-${heading.depth}`} href={`#${heading.slug}`} data-toc-link>{heading.text}</a>
           ))}
         </nav>
       </aside>
