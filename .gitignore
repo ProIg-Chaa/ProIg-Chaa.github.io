@@ -3,6 +3,7 @@ dist/
 .astro/
 .playwright-cli/
 output/playwright/
+formatted-notes/
 .env
 .DS_Store
 npm-debug.log*

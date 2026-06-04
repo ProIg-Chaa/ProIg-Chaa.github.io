@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Normalize Markdown math syntax for the Astro/remark-math note pipeline.
+"""Prepare formatted Markdown notes for publishing.
 
-Default mode is a dry run. Use --write to update files in place.
+The script never edits source notes. It reads Markdown files, normalizes common
+math delimiters, refreshes frontmatter timestamps, and writes formatted copies
+to a separate output directory.
 """
 
 from __future__ import annotations
 
 import argparse
+import shutil
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 
@@ -18,6 +22,7 @@ MATH_FENCE_RE = re.compile(r"^\s*\$\$\s*$")
 FENCE_RE = re.compile(r"^\s*(```|~~~)")
 INLINE_PAREN_RE = re.compile(r"\\\((.+?)\\\)")
 INLINE_BRACKET_ONE_LINE_RE = re.compile(r"\\\[(.+?)\\\]")
+DEFAULT_INPUT = r"D:\GS_LearningAndWork\ai infra\CS336\typora"
 
 
 @dataclass
@@ -25,6 +30,15 @@ class Finding:
     path: Path
     line: int
     message: str
+    severity: str = "fix"
+
+
+@dataclass
+class PreparedFile:
+    source: Path
+    output: Path
+    findings: list[Finding]
+    changed: bool
 
 
 def split_frontmatter(lines: list[str]) -> tuple[list[str], list[str]]:
@@ -77,7 +91,7 @@ def normalize_math_boundaries(lines: list[str], path: Path) -> tuple[list[str], 
             continue
 
         if not in_math:
-            converted = INLINE_PAREN_RE.sub(lambda m: f"${m.group(1)}$", line)
+            converted = INLINE_PAREN_RE.sub(lambda match: f"${match.group(1)}$", line)
             if converted != line:
                 findings.append(Finding(path, index, r"converted inline math \( ... \) to $...$"))
             line = converted
@@ -85,7 +99,9 @@ def normalize_math_boundaries(lines: list[str], path: Path) -> tuple[list[str], 
         out.append(line)
 
     if in_math:
-        findings.append(Finding(path, len(lines), "unclosed $$ math block"))
+        findings.append(Finding(path, len(lines), "unclosed $$ math block", severity="error"))
+    if in_code:
+        findings.append(Finding(path, len(lines), "unclosed fenced code block", severity="error"))
 
     return out, findings
 
@@ -99,17 +115,48 @@ def collapse_extra_blank_lines_around_math(lines: list[str]) -> list[str]:
     return out
 
 
-def fix_file(path: Path) -> tuple[str, list[Finding], bool]:
+def upsert_frontmatter(frontmatter: list[str], timestamp: str) -> list[str]:
+    if frontmatter:
+        body = frontmatter[1:-1]
+    else:
+        body = []
+
+    seen_date = False
+    seen_updated = False
+    next_body: list[str] = []
+
+    for line in body:
+        key = line.split(":", 1)[0].strip() if ":" in line else ""
+        if key == "date":
+            seen_date = True
+            next_body.append(line)
+        elif key == "updated":
+            seen_updated = True
+            next_body.append(f"updated: {timestamp}")
+        else:
+            next_body.append(line)
+
+    if not seen_date:
+        next_body.insert(0, f"date: {timestamp}")
+    if not seen_updated:
+        insert_at = 1 if next_body and next_body[0].startswith("date:") else len(next_body)
+        next_body.insert(insert_at, f"updated: {timestamp}")
+
+    return ["---", *next_body, "---", ""]
+
+
+def prepare_text(path: Path, timestamp: str) -> tuple[str, list[Finding], bool]:
     original = path.read_text(encoding="utf-8-sig")
-    lines = original.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    normalized_original = original.replace("\r\n", "\n").replace("\r", "\n").rstrip() + "\n"
+    lines = normalized_original.split("\n")
     frontmatter, body = split_frontmatter(lines)
 
     fixed_body, findings = normalize_math_boundaries(body, path)
     fixed_body = collapse_extra_blank_lines_around_math(fixed_body)
-    fixed = "\n".join(frontmatter + fixed_body).rstrip() + "\n"
-    original_normalized = original.replace("\r\n", "\n").replace("\r", "\n").rstrip() + "\n"
+    fixed_frontmatter = upsert_frontmatter(frontmatter, timestamp)
+    fixed = "\n".join(fixed_frontmatter + fixed_body).rstrip() + "\n"
 
-    return fixed, findings, bool(findings) and fixed != original_normalized
+    return fixed, findings, fixed != normalized_original
 
 
 def iter_markdown_files(root: Path) -> list[Path]:
@@ -118,52 +165,100 @@ def iter_markdown_files(root: Path) -> list[Path]:
     return sorted(path for path in root.rglob("*.md") if path.is_file())
 
 
+def relative_output_path(path: Path, input_root: Path, output_root: Path) -> Path:
+    if input_root.is_file():
+        return output_root / path.name
+    return output_root / path.relative_to(input_root)
+
+
+def safe_reset_output_dir(output_root: Path, repo: Path) -> None:
+    resolved_output = output_root.resolve()
+    resolved_repo = repo.resolve()
+
+    if resolved_output == resolved_repo:
+        raise ValueError("Refusing to use repository root as output directory.")
+    if not str(resolved_output).startswith(str(resolved_repo)):
+        raise ValueError("Output directory must stay inside this repository.")
+    if resolved_output.exists():
+        shutil.rmtree(resolved_output)
+    resolved_output.mkdir(parents=True, exist_ok=True)
+
+
+def prepare_files(input_root: Path, output_root: Path, timestamp: str) -> list[PreparedFile]:
+    prepared: list[PreparedFile] = []
+    for source in iter_markdown_files(input_root):
+        output = relative_output_path(source, input_root, output_root)
+        text, findings, changed = prepare_text(source, timestamp)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text, encoding="utf-8", newline="\n")
+        prepared.append(PreparedFile(source, output, findings, changed))
+    return prepared
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Normalize Markdown math delimiters in notes.")
+    parser = argparse.ArgumentParser(description="Create formatted Markdown copies for publishing.")
     parser.add_argument(
-        "paths",
-        nargs="*",
-        default=["notes"],
-        help="Markdown files or directories to scan. Defaults to notes/",
+        "--input",
+        default=DEFAULT_INPUT,
+        help=f"Markdown file or directory to prepare. Defaults to {DEFAULT_INPUT}.",
     )
-    parser.add_argument("--write", action="store_true", help="Write fixes to disk.")
+    parser.add_argument(
+        "--output",
+        default="formatted-notes",
+        help="Output directory for formatted copies. Defaults to formatted-notes/.",
+    )
+    parser.add_argument(
+        "--timestamp",
+        default=None,
+        help="Frontmatter timestamp to write. Defaults to current local time.",
+    )
     args = parser.parse_args()
 
     repo = Path.cwd()
-    targets: list[Path] = []
-    for value in args.paths:
-        target = Path(value)
-        if not target.is_absolute():
-            target = repo / target
-        targets.extend(iter_markdown_files(target))
+    input_root = Path(args.input)
+    output_root = Path(args.output)
+    if not input_root.is_absolute():
+        input_root = repo / input_root
+    if not output_root.is_absolute():
+        output_root = repo / output_root
 
-    total_findings: list[Finding] = []
-    changed: list[Path] = []
+    timestamp = args.timestamp or datetime.now().astimezone().isoformat(timespec="seconds")
+    safe_reset_output_dir(output_root, repo)
+    prepared = prepare_files(input_root, output_root, timestamp)
 
-    for path in targets:
-        fixed, findings, did_change = fix_file(path)
-        total_findings.extend(findings)
-        if did_change:
-            changed.append(path)
-            if args.write:
-                path.write_text(fixed, encoding="utf-8", newline="\n")
+    all_findings = [finding for item in prepared for finding in item.findings]
+    errors = [finding for finding in all_findings if finding.severity == "error"]
+    fixes = [finding for finding in all_findings if finding.severity != "error"]
 
-    if total_findings:
-        print("Potential math formatting fixes:")
-        for item in total_findings:
+    print(f"Prepared {len(prepared)} Markdown file(s).")
+    print(f"Source: {input_root}")
+    print(f"Output: {output_root}")
+    print(f"Timestamp: {timestamp}")
+
+    if fixes:
+        print("\nMath formatting fixes applied in generated copies:")
+        for item in fixes:
             rel = item.path.relative_to(repo) if item.path.is_relative_to(repo) else item.path
             print(f"- {rel}:{item.line}: {item.message}")
     else:
-        print("No math delimiter issues found.")
+        print("\nNo math delimiter fixes were needed.")
 
+    changed = [item for item in prepared if item.changed]
     if changed:
-        mode = "Updated" if args.write else "Would update"
-        print(f"\n{mode} {len(changed)} file(s):")
-        for path in changed:
-            rel = path.relative_to(repo) if path.is_relative_to(repo) else path
-            print(f"- {rel}")
+        print("\nGenerated files with source-to-output changes:")
+        for item in changed:
+            src = item.source.relative_to(repo) if item.source.is_relative_to(repo) else item.source
+            dst = item.output.relative_to(repo) if item.output.is_relative_to(repo) else item.output
+            print(f"- {src} -> {dst}")
     else:
-        print("\nNo files need changes.")
+        print("\nGenerated copies match normalized source content except for output location.")
+
+    if errors:
+        print("\nBlocking math/code formatting errors:")
+        for item in errors:
+            rel = item.path.relative_to(repo) if item.path.is_relative_to(repo) else item.path
+            print(f"- {rel}:{item.line}: {item.message}")
+        return 1
 
     return 0
 

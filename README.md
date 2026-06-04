@@ -20,6 +20,14 @@ npm run dev
 Astro 会把分类 key 归一为小写，界面会继续显示成中文分类名。
 分类页会生成为 `/notes/category/<category>/`，例如 `/notes/category/lecture/`。
 
+发布前可以生成一份格式化副本，不会修改源笔记：
+
+```bash
+python scripts/fix_markdown_math.py
+```
+
+脚本默认从 `D:\GS_LearningAndWork\ai infra\CS336\typora` 读取源笔记，把格式化后的 Markdown 写入 `formatted-notes/`，自动刷新 frontmatter 的 `updated` 时间，并检查/规范化常见公式分隔符。
+
 ## 部署
 
 仓库名使用 `ProIg-Chaa.github.io`。推送到 `main` 后，GitHub Actions 会自动构建并部署到 `https://proig-chaa.github.io/`。
