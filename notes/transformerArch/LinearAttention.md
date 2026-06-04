@@ -3,11 +3,11 @@ date: 2026-06-02
 updated: 2026-06-02
 ---
 
+*By Chaa*
+
 # 线性注意力：从 Softmax Attention 到 Kernel Attention 的本质变化
 
-线性注意力不是“把标准 attention 免费等价加速”，而是把标准 attention 的记忆机制从：每个 query 显式检索所有历史 token
-
-改成了：
+线性注意力不是“把标准 attention 免费等价加速”，而是把标准 attention 的记忆机制从：每个 query 显式检索所有历史 token改成了：
 先把历史 key-value 压缩进一个固定大小状态，再让 query 从这个状态中读取
 
 这个变化带来了线性复杂度，也带来了精确检索能力的损失。
