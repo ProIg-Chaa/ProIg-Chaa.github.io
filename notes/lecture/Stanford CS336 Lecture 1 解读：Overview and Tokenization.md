@@ -1,3 +1,8 @@
+---
+date: 2026-05-29
+updated: 2026-05-29
+---
+
 # Stanford CS336 Lecture 1 解读：Overview and Tokenization
 
 **ps:其实这节课还有一些前瞻的，抑或是关于gpu架构的闲谈，但是我就没有记录。之后我应该会出专门按gpu/训练/推理等支线形式更新的系列**

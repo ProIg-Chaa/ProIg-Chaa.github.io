@@ -1,3 +1,8 @@
+---
+date: 2026-06-01
+updated: 2026-06-01
+---
+
 # Stanford CS336 Lecture 4 解读：Attention Alternatives and Mixtures of Experts
 
 *PS:这一讲可以看成第 3 讲架构取舍的进一步延伸。第 3 讲主要讲现代 dense Transformer 为什么采用 Pre-Norm、RMSNorm、RoPE、SwiGLU、GQA 等设计；第 4 讲则继续追问：如果标准 Transformer 还是太贵怎么办？尤其当上下文越来越长、参数规模越来越大时，仅仅优化标准 attention 和 dense MLP 可能已经不够了。所以这一讲的主线就是：如何让模型的计算从“全量使用资源”变成“按需使用资源”。*

@@ -1,3 +1,8 @@
+---
+date: 2026-05-29
+updated: 2026-05-29
+---
+
 # Stanford CS336 Lecture 3 解读：Architectures, Hyperparameters
 
 视频链接：<https://www.youtube.com/watch?v=ptFiH_bHnJw&list=PLoROMvodv4rOY23Y0BoGoBGgQ1zmU_MT_&index=3>

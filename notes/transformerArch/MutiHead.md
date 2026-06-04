@@ -1,3 +1,8 @@
+---
+date: 2026-05-30
+updated: 2026-05-30
+---
+
 # 注意力头的本质：为什么 Multi-Head Attention 不只是把大矩阵切成小矩阵
 
 *By Chaa*

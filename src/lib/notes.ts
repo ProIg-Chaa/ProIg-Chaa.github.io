@@ -1,6 +1,4 @@
 import { getCollection } from "astro:content";
-import { existsSync, statSync } from "node:fs";
-import path from "node:path";
 
 export const categoryLabels = {
   lecture: "CS336 课程解读",
@@ -75,15 +73,6 @@ function plainSummary(body: string) {
   return cleaned ? `${cleaned.slice(0, 120)}${cleaned.length > 120 ? "..." : ""}` : "一篇关于 AI systems 与 Transformer 的学习笔记。";
 }
 
-function sourceMtime(id: string) {
-  const candidates = [
-    path.join(process.cwd(), "notes", id),
-    path.join(process.cwd(), "notes", `${id}.md`)
-  ];
-  const existing = candidates.find((candidate) => existsSync(candidate));
-  return existing ? statSync(existing).mtime : new Date();
-}
-
 export async function getAllNotes(): Promise<SiteNote[]> {
   const entries = await getCollection("notes", ({ data }) => data.draft !== true);
 
@@ -95,7 +84,7 @@ export async function getAllNotes(): Promise<SiteNote[]> {
       const basename = stripExtension(parts.at(-1) ?? id);
       const title = entry.data.title ?? firstHeading(entry.body ?? "") ?? basename;
       const slug = `${slugify(category, category)}-${slugify(basename, id)}`;
-      const updated = entry.data.updated ?? entry.data.date ?? sourceMtime(id);
+      const updated = entry.data.updated ?? entry.data.date;
 
       return {
         entry,
