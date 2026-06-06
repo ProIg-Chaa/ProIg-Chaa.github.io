@@ -4,17 +4,17 @@ function setupMeteors() {
   const layer = document.querySelector(".meteor-layer");
   if (!layer || reduceMotion) return;
 
-  const meteorCount = window.innerWidth < 720 ? 14 : 28;
+  const meteorCount = window.innerWidth < 720 ? 10 : 20;
   layer.replaceChildren();
 
   for (let index = 0; index < meteorCount; index += 1) {
     const meteor = document.createElement("span");
-    const size = 96 + Math.random() * 168;
-    const top = -16 + Math.random() * 76;
-    const left = 78 + Math.random() * 34;
-    const duration = 3.8 + Math.random() * 3.4;
-    const delay = -(index * 0.34 + Math.random() * 0.9);
-    const opacity = 0.58 + Math.random() * 0.36;
+    const size = 84 + Math.random() * 136;
+    const top = -18 + Math.random() * 58;
+    const left = 62 + Math.random() * 46;
+    const duration = 5.6 + Math.random() * 4.2;
+    const delay = -(index * 0.62 + Math.random() * 1.4);
+    const opacity = 0.36 + Math.random() * 0.28;
 
     meteor.className = "meteor";
     meteor.style.setProperty("--meteor-width", `${size}px`);
