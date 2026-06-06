@@ -100,13 +100,14 @@ a {
   top: var(--meteor-top);
   left: var(--meteor-left);
   width: var(--meteor-width);
-  height: 1px;
+  height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(235, 248, 255, 0.96));
-  box-shadow: 0 0 18px rgba(138, 215, 255, 0.42);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(198, 232, 255, 0.48), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 0 20px rgba(138, 215, 255, 0.58), 0 0 42px rgba(255, 255, 255, 0.18);
   opacity: 0;
   transform: rotate(-28deg) translate3d(0, 0, 0);
   animation: meteor-flight var(--meteor-duration) linear var(--meteor-delay) infinite;
+  will-change: opacity, transform;
 }
 
 .meteor::after {
@@ -128,18 +129,22 @@ a {
     transform: rotate(-28deg) translate3d(0, 0, 0);
   }
 
-  7% {
+  8% {
     opacity: var(--meteor-opacity);
   }
 
-  28% {
+  36% {
+    opacity: calc(var(--meteor-opacity) * 0.9);
+  }
+
+  58% {
     opacity: 0;
-    transform: rotate(-28deg) translate3d(-720px, 390px, 0);
+    transform: rotate(-28deg) translate3d(-122vw, 76vh, 0);
   }
 
   100% {
     opacity: 0;
-    transform: rotate(-28deg) translate3d(-720px, 390px, 0);
+    transform: rotate(-28deg) translate3d(-122vw, 76vh, 0);
   }
 }
 
