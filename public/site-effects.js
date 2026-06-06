@@ -1,5 +1,32 @@
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+function setupMeteors() {
+  const layer = document.querySelector(".meteor-layer");
+  if (!layer || reduceMotion) return;
+
+  const meteorCount = window.innerWidth < 720 ? 9 : 16;
+  layer.replaceChildren();
+
+  for (let index = 0; index < meteorCount; index += 1) {
+    const meteor = document.createElement("span");
+    const size = 72 + Math.random() * 128;
+    const top = -8 + Math.random() * 64;
+    const left = 12 + Math.random() * 96;
+    const delay = Math.random() * -18;
+    const duration = 4.6 + Math.random() * 5.8;
+    const opacity = 0.36 + Math.random() * 0.5;
+
+    meteor.className = "meteor";
+    meteor.style.setProperty("--meteor-width", `${size}px`);
+    meteor.style.setProperty("--meteor-top", `${top}%`);
+    meteor.style.setProperty("--meteor-left", `${left}%`);
+    meteor.style.setProperty("--meteor-delay", `${delay}s`);
+    meteor.style.setProperty("--meteor-duration", `${duration}s`);
+    meteor.style.setProperty("--meteor-opacity", `${opacity}`);
+    layer.append(meteor);
+  }
+}
+
 function setupReadingProgress() {
   const article = document.querySelector(".reading-scope");
   const bar = document.querySelector(".reading-progress span");
@@ -102,3 +129,4 @@ setupReadingProgress();
 setupBackToTop();
 setupTocHighlight();
 setupRevealMotion();
+setupMeteors();

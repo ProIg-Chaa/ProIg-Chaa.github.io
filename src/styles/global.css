@@ -1,15 +1,20 @@
 :root {
-  color-scheme: light;
-  --bg: #fbfaf7;
-  --surface: #ffffff;
-  --ink: #1d2528;
-  --muted: #657174;
-  --line: #dfe5df;
-  --accent: #246b5b;
-  --accent-strong: #164d43;
-  --warm: #b85b3f;
-  --code-bg: #f3f5f2;
-  --shadow: 0 18px 40px rgba(36, 44, 42, 0.08);
+  color-scheme: dark;
+  --bg: #030509;
+  --surface: rgba(9, 14, 25, 0.78);
+  --article-surface: rgba(8, 12, 23, 0.88);
+  --ink: #eef4ff;
+  --article-ink: #edf4ff;
+  --muted: #a3afc5;
+  --article-muted: #a9b5c9;
+  --line: rgba(191, 208, 255, 0.16);
+  --article-line: rgba(191, 208, 255, 0.18);
+  --accent: #8ad7ff;
+  --accent-strong: #d8f1ff;
+  --warm: #f6b17a;
+  --code-bg: rgba(255, 255, 255, 0.08);
+  --shadow: 0 22px 70px rgba(0, 0, 0, 0.34);
+  --glass: rgba(7, 11, 22, 0.66);
 }
 
 * {
@@ -22,21 +27,120 @@ html {
 
 body {
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(36, 107, 91, 0.08), transparent 360px),
-    var(--bg);
+  min-height: 100vh;
+  background: var(--bg);
   color: var(--ink);
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
   line-height: 1.7;
 }
 
 body::selection {
-  background: rgba(36, 107, 91, 0.18);
+  background: rgba(138, 215, 255, 0.26);
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+.cosmic-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(78, 144, 255, 0.18), transparent 26%),
+    radial-gradient(circle at 76% 4%, rgba(165, 106, 255, 0.14), transparent 28%),
+    radial-gradient(circle at 82% 78%, rgba(17, 200, 180, 0.08), transparent 30%),
+    linear-gradient(180deg, #02040a 0%, #040711 54%, #010207 100%);
+}
+
+.cosmic-background::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(180deg, rgba(3, 5, 9, 0.12), rgba(3, 5, 9, 0.72)),
+    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.48) 78%);
+}
+
+.starfield,
+.starfield::before,
+.starfield::after {
+  position: absolute;
+  inset: -20%;
+  content: "";
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.82) 0 1px, transparent 1.3px),
+    radial-gradient(circle, rgba(160, 202, 255, 0.5) 0 1px, transparent 1.4px);
+  background-position: 0 0, 42px 72px;
+  background-size: 118px 118px, 176px 176px;
+  opacity: 0.44;
+}
+
+.starfield::before {
+  transform: rotate(18deg) scale(1.2);
+  opacity: 0.28;
+}
+
+.starfield::after {
+  transform: rotate(-11deg) scale(0.9);
+  opacity: 0.2;
+}
+
+.meteor-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.meteor {
+  position: absolute;
+  top: var(--meteor-top);
+  left: var(--meteor-left);
+  width: var(--meteor-width);
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(235, 248, 255, 0.96));
+  box-shadow: 0 0 18px rgba(138, 215, 255, 0.42);
+  opacity: 0;
+  transform: rotate(-28deg) translate3d(0, 0, 0);
+  animation: meteor-flight var(--meteor-duration) linear var(--meteor-delay) infinite;
+}
+
+.meteor::after {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.9);
+  content: "";
+  transform: translateY(-50%);
+}
+
+@keyframes meteor-flight {
+  0% {
+    opacity: 0;
+    transform: rotate(-28deg) translate3d(0, 0, 0);
+  }
+
+  7% {
+    opacity: var(--meteor-opacity);
+  }
+
+  28% {
+    opacity: 0;
+    transform: rotate(-28deg) translate3d(-720px, 390px, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(-28deg) translate3d(-720px, 390px, 0);
+  }
 }
 
 .reading-progress {
@@ -51,7 +155,7 @@ a {
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--warm));
+  background: linear-gradient(90deg, var(--accent), #fff, var(--warm));
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 80ms linear;
@@ -70,6 +174,8 @@ main {
   justify-content: space-between;
   gap: 20px;
   padding: 22px 0;
+  position: relative;
+  z-index: 2;
 }
 
 .brand {
@@ -85,8 +191,9 @@ main {
   height: 34px;
   place-items: center;
   border-radius: 8px;
-  background: var(--ink);
-  color: #fff;
+  background: rgba(238, 244, 255, 0.92);
+  color: #050914;
+  box-shadow: 0 0 26px rgba(138, 215, 255, 0.18);
 }
 
 .site-nav {
@@ -94,7 +201,7 @@ main {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px 18px;
-  color: var(--muted);
+  color: rgba(238, 244, 255, 0.74);
   font-size: 0.95rem;
 }
 
@@ -111,6 +218,8 @@ main {
   align-items: center;
   min-height: calc(100vh - 180px);
   padding: 56px 0 44px;
+  position: relative;
+  z-index: 1;
 }
 
 .eyebrow,
@@ -133,6 +242,8 @@ h3 {
   max-width: 760px;
   margin-top: 10px;
   font-size: clamp(2.7rem, 8vw, 5.9rem);
+  color: #f7fbff;
+  text-shadow: 0 0 36px rgba(138, 215, 255, 0.18);
 }
 
 .hero-text,
@@ -177,19 +288,22 @@ h3 {
 .button.primary,
 .filter-row a.active {
   border-color: var(--accent);
-  background: var(--accent);
-  color: #fff;
+  background: linear-gradient(135deg, rgba(138, 215, 255, 0.94), rgba(246, 177, 122, 0.88));
+  color: #07111f;
+  box-shadow: 0 14px 34px rgba(30, 153, 220, 0.2);
 }
 
 .button.ghost {
-  background: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
 }
 
 .hero-panel,
 .about-block {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--glass);
+  backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
 }
 
@@ -239,12 +353,13 @@ h3 {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+  backdrop-filter: blur(16px);
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .note-card:hover,
 .note-row:hover {
-  border-color: rgba(36, 107, 91, 0.45);
+  border-color: rgba(138, 215, 255, 0.48);
   box-shadow: var(--shadow);
   transform: translateY(-2px);
 }
@@ -351,10 +466,26 @@ h3 {
 
 .article-content {
   min-width: 0;
-  border: 1px solid var(--line);
+  border: 1px solid var(--article-line);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--article-surface);
+  color: var(--article-ink);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(18px);
   padding: clamp(22px, 5vw, 54px);
+}
+
+.article-content,
+.article-content p,
+.article-content li,
+.article-content blockquote,
+.article-content table {
+  color: var(--article-ink);
+}
+
+.article-content :is(h1, h2, h3),
+.article-content strong {
+  color: var(--article-ink);
 }
 
 .article-content :is(h1, h2, h3) {
@@ -380,8 +511,8 @@ h3 {
   margin: 24px 0;
   border-left: 4px solid var(--accent);
   padding: 8px 0 8px 18px;
-  color: var(--muted);
-  background: #f7faf6;
+  color: var(--article-muted);
+  background: rgba(138, 215, 255, 0.08);
 }
 
 .article-content pre,
@@ -392,11 +523,13 @@ h3 {
 .article-content :not(pre) > code {
   border-radius: 6px;
   background: var(--code-bg);
+  color: #d8f1ff;
   padding: 0.12em 0.36em;
 }
 
 .article-content pre {
   overflow: auto;
+  border: 1px solid var(--article-line);
   border-radius: 8px;
   padding: 18px;
 }
@@ -410,8 +543,16 @@ h3 {
 
 .article-content th,
 .article-content td {
-  border: 1px solid var(--line);
+  border: 1px solid var(--article-line);
   padding: 10px 12px;
+}
+
+.article-content th {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.article-content .katex {
+  color: var(--article-ink);
 }
 
 .katex-display {
@@ -436,7 +577,7 @@ h3 {
   gap: 18px;
   border-top: 1px solid var(--line);
   padding: 28px 0 38px;
-  color: var(--muted);
+  color: rgba(238, 244, 255, 0.64);
   font-size: 0.92rem;
 }
 
@@ -451,7 +592,7 @@ h3 {
   place-items: center;
   border: 1px solid rgba(36, 107, 91, 0.24);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(8, 13, 26, 0.84);
   box-shadow: var(--shadow);
   color: var(--accent-strong);
   cursor: pointer;
@@ -464,7 +605,7 @@ h3 {
 }
 
 .back-to-top:hover {
-  background: #fff;
+  background: rgba(20, 30, 54, 0.96);
   transform: translateY(8px);
 }
 
