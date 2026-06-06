@@ -9,6 +9,7 @@ to a separate output directory.
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import re
 from dataclasses import dataclass
@@ -171,7 +172,7 @@ def relative_output_path(path: Path, input_root: Path, output_root: Path) -> Pat
     return output_root / path.relative_to(input_root)
 
 
-def safe_reset_output_dir(output_root: Path, repo: Path) -> None:
+def safe_reset_output_dir(output_root: Path, repo: Path) -> Path:
     resolved_output = output_root.resolve()
     resolved_repo = repo.resolve()
 
@@ -179,9 +180,28 @@ def safe_reset_output_dir(output_root: Path, repo: Path) -> None:
         raise ValueError("Refusing to use repository root as output directory.")
     if not str(resolved_output).startswith(str(resolved_repo)):
         raise ValueError("Output directory must stay inside this repository.")
+    def remove_readonly_and_retry(function, path, exc_info) -> None:
+        try:
+            os.chmod(path, 0o700)
+            function(path)
+        except PermissionError as error:
+            raise error
+
     if resolved_output.exists():
-        shutil.rmtree(resolved_output)
+        try:
+            shutil.rmtree(resolved_output, onexc=remove_readonly_and_retry)
+        except PermissionError:
+            fallback = resolved_output.with_name(
+                f"{resolved_output.name}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+            )
+            fallback.mkdir(parents=True, exist_ok=False)
+            print(
+                f"Could not reset {resolved_output}; writing to fallback output {fallback}."
+            )
+            return fallback
+
     resolved_output.mkdir(parents=True, exist_ok=True)
+    return resolved_output
 
 
 def prepare_files(input_root: Path, output_root: Path, timestamp: str) -> list[PreparedFile]:
@@ -223,7 +243,7 @@ def main() -> int:
         output_root = repo / output_root
 
     timestamp = args.timestamp or datetime.now().astimezone().isoformat(timespec="seconds")
-    safe_reset_output_dir(output_root, repo)
+    output_root = safe_reset_output_dir(output_root, repo)
     prepared = prepare_files(input_root, output_root, timestamp)
 
     all_findings = [finding for item in prepared for finding in item.findings]
