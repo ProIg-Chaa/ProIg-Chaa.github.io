@@ -9,6 +9,8 @@ updated: 2026-06-07T18:34:19-07:00
 
 论文：**Memory Caching: RNNs with Growing Memory**
 
+*链接*：https://arxiv.org/html/2602.24281v1
+
 核心问题：
 
 > Transformer 的强召回能力来自“随上下文长度增长的记忆”，但代价是高计算复杂度和高 KV cache 开销。  
