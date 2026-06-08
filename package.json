@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && node scripts/copy_note_assets.mjs",
     "preview": "astro preview"
   },
   "dependencies": {

@@ -3,7 +3,8 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { formatDate, getAllNotes, getCategoryEntries, getNotesByCategory } from "../../../lib/notes";
 
 export async function getStaticPaths() {
-  const categories = getCategoryEntries();
+  const notes = await getAllNotes();
+  const categories = getCategoryEntries(notes);
   return categories.map((category) => ({
     params: { category: category.key },
     props: { category }
@@ -11,9 +12,10 @@ export async function getStaticPaths() {
 }
 
 const { category } = Astro.props;
+const allNotes = await getAllNotes();
 const notes = await getNotesByCategory(category.key);
-const categories = getCategoryEntries();
-const totalNotes = (await getAllNotes()).length;
+const categories = getCategoryEntries(allNotes);
+const totalNotes = allNotes.length;
 ---
 
 <BaseLayout title={`${category.label} | ProIg-Chaa`}>

@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { formatDate, getAllNotes, getCategoryEntries } from "../../lib/notes";
 
 const notes = await getAllNotes();
-const categories = getCategoryEntries();
+const categories = getCategoryEntries(notes);
 ---
 
 <BaseLayout title="笔记 | ProIg-Chaa">

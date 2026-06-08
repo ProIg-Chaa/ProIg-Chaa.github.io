@@ -2,6 +2,7 @@ import { getCollection } from "astro:content";
 
 export const categoryLabels = {
   lecture: "CS336 课程解读",
+  paper: "论文阅读",
   transformerarch: "Transformer 架构"
 };
 
@@ -19,8 +20,18 @@ export type SiteNote = {
   url: string;
 };
 
-export function getCategoryEntries() {
-  return Object.entries(categoryLabels).map(([key, label]) => ({
+function categoryLabel(category: string, fallback: string) {
+  return categoryLabels[category] ?? fallback;
+}
+
+export function getCategoryEntries(notes: SiteNote[] = []) {
+  const entries = new Map<string, string>(Object.entries(categoryLabels));
+
+  for (const note of notes) {
+    entries.set(note.category, note.categoryLabel);
+  }
+
+  return Array.from(entries.entries()).map(([key, label]) => ({
     key,
     label,
     url: `/notes/category/${key}/`
@@ -80,7 +91,8 @@ export async function getAllNotes(): Promise<SiteNote[]> {
     .map((entry) => {
       const id = entry.id;
       const parts = id.split("/");
-      const category = parts.length > 1 ? parts[0] : "notes";
+      const rawCategory = parts.length > 1 ? parts[0] : "notes";
+      const category = slugify(rawCategory, rawCategory);
       const basename = stripExtension(parts.at(-1) ?? id);
       const title = entry.data.title ?? firstHeading(entry.body ?? "") ?? basename;
       const slug = `${slugify(category, category)}-${slugify(basename, id)}`;
@@ -92,7 +104,7 @@ export async function getAllNotes(): Promise<SiteNote[]> {
         title,
         slug,
         category,
-        categoryLabel: categoryLabels[category] ?? category,
+        categoryLabel: categoryLabel(category, rawCategory),
         summary: entry.data.summary ?? plainSummary(entry.body ?? ""),
         updated,
         url: `/notes/${slug}/`

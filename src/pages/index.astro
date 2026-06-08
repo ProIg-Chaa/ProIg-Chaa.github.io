@@ -4,7 +4,7 @@ import { formatDate, getAllNotes, getCategoryEntries } from "../lib/notes";
 
 const notes = await getAllNotes();
 const latestNotes = notes.slice(0, 3);
-const categories = getCategoryEntries().map((category) => ({
+const categories = getCategoryEntries(notes).map((category) => ({
   ...category,
   count: notes.filter((note) => note.category === category.key).length
 }));
