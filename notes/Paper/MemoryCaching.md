@@ -61,7 +61,7 @@ Memory Caching 的改动是：
 > 把序列切成多个 segment，每个 segment 结束时缓存一个 memory checkpoint。  
 > 当前 token 读取时，同时访问当前 online memory 和过去 cached memories。
 
-<img src="image\c634f0aeec04c8ad01af8565f6a3c503.png" style="zoom:75%;" />
+<img src="image\c634f0aeec04c8ad01af8565f6a3c503.png" style="zoom: 50%;" />
 
 ---
 
@@ -468,7 +468,7 @@ $$
 
 ## 10. Sparse Selective Caching：先选 Top-k，再读取
 
-<img src="image\7c11cbdddb37c07c61522e0d63d6e84e.png" style="zoom:75%;" />
+<img src="image\7c11cbdddb37c07c61522e0d63d6e84e.png" style="zoom:50%;" />
 
 Gated Residual Memory 还有一个问题：
 
